@@ -7,7 +7,7 @@ use core::panic;
 
 use crate::commands::Commands;
 use crate::image_resizer::ImageResizer;
-use crate::interpolation_methods::InterpolationMethod;
+use crate::interpolation_methods::{InterpolationMethod, StrEnum};
 
 #[derive(Parser)]
 struct Cli {
