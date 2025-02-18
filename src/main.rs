@@ -1,6 +1,8 @@
 pub mod commands;
 pub mod image_resizer;
 pub mod interpolation_methods;
+// закінчити трейт
+// зробити крейт ресайзер. і використовувати лише його
 
 use clap::Parser;
 use core::panic;

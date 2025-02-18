@@ -10,11 +10,9 @@ pub enum InterpolationMethod {
     Lanczos3,
 }
 
-pub trait StrEnum {
-    // Associated constant for string values
+pub trait StrEnum: Sized + Copy + Into<usize> {
     const VALUES: &'static [&'static str];
 
-    // Convert enum to string
     fn as_str(&self) -> &'static str
     where
         Self: Sized + Copy + Into<usize>,
@@ -22,7 +20,6 @@ pub trait StrEnum {
         Self::VALUES[(*self).into()]
     }
 
-    // Check if string matches any enum value
     fn matches_str(s: &str) -> bool
     where
         Self: Sized,
@@ -30,7 +27,6 @@ pub trait StrEnum {
         Self::VALUES.contains(&s)
     }
 
-    // Convert string to enum
     fn from_str(s: &str) -> Option<Self>
     where
         Self: Sized;
@@ -56,6 +52,10 @@ impl InterpolationMethod {
     const VALUES: &'static [&'static str] =
         &["nearest", "triangle", "cubic", "gaussian", "lanczos3"];
 
+    pub fn as_str(&self) -> &'static str {
+        <Self as StrEnum>::as_str(self) // Explicitly call the trait method
+    }
+
     pub fn to_external_image_methods(&self) -> FilterType {
         match &self {
             Self::Nearest => FilterType::Nearest,
@@ -63,6 +63,18 @@ impl InterpolationMethod {
             Self::Cubic => FilterType::CatmullRom,
             Self::Gaussian => FilterType::Gaussian,
             Self::Lanczos3 => FilterType::Lanczos3,
+        }
+    }
+}
+
+impl Into<usize> for InterpolationMethod {
+    fn into(self) -> usize {
+        match self {
+            Self::Nearest => 0,
+            Self::Triangle => 1,
+            Self::Cubic => 2,
+            Self::Gaussian => 3,
+            Self::Lanczos3 => 4,
         }
     }
 }
