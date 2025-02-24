@@ -1,23 +1,20 @@
-pub mod commands;
 pub mod image_resizer;
-pub mod interpolation_methods;
-// закінчити трейт
-// зробити крейт ресайзер. і використовувати лише його
 
 use clap::Parser;
 use core::panic;
 
-use crate::commands::Commands;
-use crate::image_resizer::ImageResizer;
-use crate::interpolation_methods::{InterpolationMethod, StrEnum};
+use crate::image_resizer::{
+    get_default_command, get_default_interpolation_method, validate_commands, validate_methods,
+    ImageResizer,
+};
 
 #[derive(Parser)]
 struct Cli {
-    #[arg(short, long, default_value=Commands::Resize.as_str())]
+    #[arg(short, long, default_value=get_default_command())]
     command: String,
     #[arg(short, long)]
     path: std::path::PathBuf,
-    #[arg(short, long, default_value=InterpolationMethod::Nearest.as_str())]
+    #[arg(short, long, default_value=get_default_interpolation_method())]
     algorithm: String,
     #[arg(long)]
     width: Option<u32>,
@@ -33,11 +30,11 @@ fn main() {
     let command = args.command;
     let algo = args.algorithm;
 
-    if !Commands::matches_str(&command) {
+    if !validate_commands(&command) {
         panic!("Not allowed command {:?}", command)
     }
 
-    if !InterpolationMethod::matches_str(&algo) {
+    if !validate_methods(&algo) {
         panic!("Not allowed algorithm {:?}", algo)
     };
 
@@ -45,36 +42,11 @@ fn main() {
         image_path: args.path,
     };
 
-    match command.as_str() {
-        s if s == Commands::Resize.as_str() => {
-            resizer.resize(
-                args.width
-                    .unwrap_or_else(|| panic!("Width field required for resize command")),
-                args.height
-                    .unwrap_or_else(|| panic!("Height field required for resize command")),
-                InterpolationMethod::from_str(&algo).unwrap(),
-            );
-            std::process::exit(0);
-        }
-
-        s if s == Commands::Upscale.as_str() => {
-            resizer.upscale(
-                args.times
-                    .unwrap_or_else(|| panic!("times field required for upscale command")),
-                InterpolationMethod::from_str(&algo).unwrap(),
-            );
-            std::process::exit(0);
-        }
-
-        s if s == Commands::Downscale.as_str() => {
-            resizer.downscale(
-                args.times
-                    .unwrap_or_else(|| panic!("times field required for downscale command")),
-                InterpolationMethod::from_str(&algo).unwrap(),
-            );
-            std::process::exit(0);
-        }
-
-        _ => panic!("Not allowed command {command}. allowd commands: [resize, upscale, downscale]"),
-    }
+    resizer.resize(
+        command.as_str(),
+        algo.as_str(),
+        args.width,
+        args.height,
+        args.times,
+    )
 }

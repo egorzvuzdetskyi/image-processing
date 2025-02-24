@@ -1,3 +1,4 @@
+use super::traits::StrEnum;
 use image::imageops::FilterType;
 use std::fmt;
 
@@ -8,28 +9,6 @@ pub enum InterpolationMethod {
     Cubic,
     Gaussian,
     Lanczos3,
-}
-
-pub trait StrEnum: Sized + Copy + Into<usize> {
-    const VALUES: &'static [&'static str];
-
-    fn as_str(&self) -> &'static str
-    where
-        Self: Sized + Copy + Into<usize>,
-    {
-        Self::VALUES[(*self).into()]
-    }
-
-    fn matches_str(s: &str) -> bool
-    where
-        Self: Sized,
-    {
-        Self::VALUES.contains(&s)
-    }
-
-    fn from_str(s: &str) -> Option<Self>
-    where
-        Self: Sized;
 }
 
 impl StrEnum for InterpolationMethod {
